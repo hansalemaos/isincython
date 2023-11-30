@@ -12,8 +12,7 @@ try:
     from .sort2 import fast_isin_cython, isin_cython_string
 except Exception as e:
     cstring = r"""# distutils: language=c++
-# distutils: extra_compile_args=/openmp
-# distutils: extra_link_args=/openmp
+# distutils: extra_compile_args=/std:c++20 /openmp /fp:fast /EHsc /Oi /Ot /Oy /Ob3 /GF /Gy /MD
 # distutils: define_macros=NPY_NO_DEPRECATED_API=NPY_1_7_API_VERSION
 # cython: binding=False
 # cython: boundscheck=False
@@ -40,7 +39,6 @@ except Exception as e:
 # cython: annotation_typing=True
 # cython: emit_code_comments=False
 # cython: cpp_locals=False
-
 cimport cython
 import numpy as np
 cimport numpy as np
@@ -49,6 +47,7 @@ from cython.parallel cimport prange
 from libcpp.unordered_set cimport unordered_set
 from libcpp.string cimport string
 from libcpp.vector cimport vector
+
 
 ctypedef fused real:
     cython.bint
@@ -75,7 +74,7 @@ ctypedef fused real:
 
 cpdef void fast_isin_cython(real[:] arr, real[:] bigarr,np.npy_bool[:] resultarray):
     cdef unordered_set[real] mySet
-    
+    cdef cython.bint isthere 
     cdef Py_ssize_t i
     cdef Py_ssize_t arrlen = arr.shape[0]
     cdef Py_ssize_t bigarrlen=bigarr.shape[0]
@@ -86,17 +85,18 @@ cpdef void fast_isin_cython(real[:] arr, real[:] bigarr,np.npy_bool[:] resultarr
         for i in range(arrlen):
             mySet.insert(arr[i])
     for key_to_check in prange(bigarrlen,nogil=True):
-        it = mySet.find( bigarr[key_to_check])
-        if it != mySet.end():
+        isthere= mySet.contains( bigarr[key_to_check])
+        if isthere:
             resultarray[key_to_check]=True
 
 
 cdef void vector_sort_cython_stringsub(vector[string] my_vector,unordered_set[string] mySet,np.npy_bool[:]resultarray, Py_ssize_t lbigarr):
     cdef Py_ssize_t key_to_check
+    cdef cython.bint isthere 
     cdef unordered_set[string].iterator it
     for key_to_check in prange(lbigarr,nogil=True):
-        it = mySet.find( my_vector[key_to_check])
-        if it != mySet.end():
+        isthere=  mySet.contains( my_vector[key_to_check])
+        if isthere:
             resultarray[key_to_check]=True
 
 cpdef void isin_cython_string(needels, haystack, cython.int lneedels, cython.int lhaystack ,np.npy_bool[:] resultarray):
