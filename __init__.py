@@ -49,8 +49,7 @@ from cython.parallel cimport prange
 from libcpp.unordered_set cimport unordered_set
 from libcpp.string cimport string
 from libcpp.vector cimport vector
-from cpython cimport array    
-from libc.stdio cimport printf
+
 ctypedef fused real:
     cython.bint
     cython.char
