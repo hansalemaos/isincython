@@ -107,6 +107,8 @@ cpdef void isin_cython_string(needels, haystack, cython.int lneedels, cython.int
     cdef Py_ssize_t lneedelsp=lneedels
     cdef Py_ssize_t lhaystackp=lhaystack
     cdef Py_ssize_t i
+    mySet.reserve(lneedelsp)
+    my_vector.reserve(lhaystackp)
     for i in range(lhaystackp):
             my_vector.push_back(haystack[i])
     for i in range(lneedelsp):
